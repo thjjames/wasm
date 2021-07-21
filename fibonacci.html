@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>fibonacci测试</title>
+  </head>
+  <script>
+    function fibonacciJS(n) {
+      if (n < 2) {
+        return 1;
+      }
+      return fibonacciJS(n - 1) + fibonacciJS(n - 2);
+    }
+    const response = fetch('fibonacci.wasm');
+    const numArr = [10, 20, 30];
+    WebAssembly.instantiateStreaming(response).then(
+      ({ instance }) => {
+        const { fibonacci } = instance.exports;
+        numArr.forEach(num => {
+          let consoleTable = {};
+          let ccTime = 0;
+          let jsTime = 0;
+          for (let time = 0; time < 10; time++) {
+            let start = performance.now();
+            fibonacci(num);
+            ccTime += (performance.now() - start);
+
+            start = performance.now();
+            fibonacciJS(num);
+            jsTime += (performance.now() - start);
+          }
+          consoleTable[`wasm模块调用fibonacci数字${num}时间(平均)`] = `${ccTime / 10}ms`
+          consoleTable[`js模块调用fibonacci数字${num}时间(平均)`] = `${jsTime / 10}ms`
+          console.table(consoleTable);
+          // console.log(`wasm模块调用fibonacci数字${num}时间(平均)：${ccTime / 10}ms`)
+          // console.log(`js模块平均调用时间(平均)：${jsTime / 10}ms`)
+        })
+      }
+    )
+  </script>
+  <body>
+  </body>
+</html>
